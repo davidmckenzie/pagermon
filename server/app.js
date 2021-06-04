@@ -25,6 +25,7 @@ var SQLiteStore = require('connect-sqlite3')(session);
 var flash    = require('connect-flash');
 
 
+
 process.on('SIGINT', function() {
     console.log( "\nGracefully shutting down from SIGINT (Ctrl-C)" );
     process.exit(1);
@@ -199,8 +200,18 @@ app.use(function(err, req, res, next) {
 // Add cronjob to automatically refresh aliases
 var dbtype = nconf.get('database:type')
 if (dbtype == 'mysql') {
+  const cronvalidate = require('cron-validator');
+  // Get CRON from config
+  var cronartime = nconf.get('database:aliasRefreshInterval');
+  //If value is falsy (undefined, empty, null etc), set as default
+  if (!cronartime){cronartime = "0 5,35 * * * *";}
+  //Check value isn't garbage, if it is set to default
+  if (!cronvalidate.isValidCron(cronartime)) {
+    logger.main.warn('CRON: Invalid CRON configuration in config file. Defaulting to: "0 5,35 * * * *" ')
+    cronartime = "0 5,35 * * * *";
+  } 
   var aliasRefreshJob = require('cron').CronJob;
-  new aliasRefreshJob('0 5,35 * * * *', function() {
+  new aliasRefreshJob(cronartime, function() {
     var refreshRequired = nconf.get('database:aliasRefreshRequired')
     logger.main.debug('CRON: Running Cronjob AliasRefresh')
     if (refreshRequired == 1) {

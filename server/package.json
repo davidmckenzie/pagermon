@@ -29,6 +29,7 @@
     "cookie-parser": "~1.4.3",
     "core-js": "^2.4.1",
     "cron": "^1.7.0",
+    "cron-validator": "^1.2.1",
     "debug": "~2.6.3",
     "discord.js": "^11.6.4",
     "ejs": "~2.5.6",

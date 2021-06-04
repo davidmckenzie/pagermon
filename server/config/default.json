@@ -11,7 +11,8 @@
   },
   "database": {
     "file": "./messages.db",
-    "type": "sqlite3"
+    "type": "sqlite3",
+    "aliasRefreshInterval": "0 5,35 * * * *"
   },
   "messages": {
     "maxLimit": 120,

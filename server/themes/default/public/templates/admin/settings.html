@@ -86,7 +86,7 @@
               </div>
             </div>
 
-            <h5>Database</h5>
+            <h5>Database</h5><span class="text-warning">These settings require restart to take effect.</span>
             <div class="form-group">
               <label for="database.type" class="col-xs-4 col-sm-3 control-label">Type</label>
               <div class="col-xs-8 col-sm-9">
@@ -146,7 +146,13 @@
                 <span id="helpBlock" class="help-block">Database Password</span>
                 </div>
             </div> 
-            
+            <div class="form-group" ng-if="settings.database.type == 'mysql'">
+              <label for="database.aliasRefreshInterval" class="col-xs-4 col-sm-3 control-label">Alias Refresh CRON</label>
+              <div class="col-xs-8 col-sm-9">
+              <input type="text" class="form-control" name="database.aliasRefreshInterval" ng-model="settings.database.aliasRefreshInterval">
+              <span id="helpBlock" class="help-block"><strong>Advanced Users</strong> - The cron timing for Automatic Alias Refresh. See <a href="https://www.npmjs.com/package/node-cron#cron-syntax" target="_blank">Cron Syntax</a>.<br />Default = "0 5,35 * * * *" (The 5th and 35th minute of every hour)</span>
+              </div>
+            </div> 
             <fieldset disabled>
             <div class="form-group">
               <div class="col-xs-8 col-xs-offset-2 col-sm-9 col-sm-offset-3">
