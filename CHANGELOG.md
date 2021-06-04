@@ -1,4 +1,18 @@
-﻿# 0.3.10 - 2020-06-24
+﻿# 0.3.11 - 2021-05-21
+* Added EAS support, Just run multimon-ng -a EAS #432 @maxwelldps
+* Added EAS FIltering Based on FIPS and EVENT and moved [jsame to git](https://github.com/MaxwellDPS/jsame/packages/329242) And updated jSAME to 0.1.9 #435 @MaxwellDPS
+* Fix to PDW Python ingestion script time format #439 @jjeffhendryx
+* Fix Gotify Plugin URL construction #445 @stubbers
+* Fix textAngular.css not being called in header.ejs #449 @DingosGotMyBaby
+* Fix Alias Column on iPhoneX devices #450 @DanrwAU
+* Fix Index breaking bug in #412 #452 @DanrwAU
+* Fix Broken Alias Search #453 @marshyonline
+* Fix Twitter trunication at 280 chars #461 @maxwelldps
+* Fixed Typo's #465 @geelongmicrosoldering
+* Fix layout when message contains long word #474 @geelongmicrosoldering
+* Improved wildcard feature #458 @eopo
+
+# 0.3.10 - 2020-06-24
 
 * Downgrade discord.js package to fix crashes #415 @DanrwAU
 * Add user-agent strings for webhook plugins #416 @DanrwAU

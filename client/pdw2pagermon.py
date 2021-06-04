@@ -39,7 +39,7 @@ class CustomSMTPServer(smtpd.SMTPServer):
 		mime_message = email.message_from_bytes(data)
 		message = mime_message.get_payload()
 		flexcode, a, b, bitrate, msg = message.split(' ',4)
-		when = datetime.now().strftime('%d-%m-%Y %H:%M:%S')
+		when = int(time.time())
 		flexcode = "00"+flexcode
 		msg = msg.strip()
 		bitrate = str(bitrate)

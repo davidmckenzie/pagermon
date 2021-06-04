@@ -43,11 +43,11 @@
 <% include global/menu.ejs %>
 
 <div id="content" class="container-fluid" ng-cloak>
-  
+
   <ng-view></ng-view>
 
   <!-- Template -->
-  
+
   <script type="text/ng-template" id="/messages.html">
   <div ng-show="loading" class="loading"><i class="fa fa-spinner fa-spin"></i></div>
     <p></p>
@@ -139,23 +139,28 @@
               </span>
               <strong style="vertical-align: middle;"></strong>
             </td>
-            <td class="shrink noMobile noSmall clickable-td" ng-if="user" uib-popover-template="'templates/popover.html'" popover-append-to-body=true ng-click="popoverEl = 'alias'" popover-trigger="'outsideClick'">
+            <td class="shrink noMobile clickable-td" ng-if="user"
+                uib-popover-template="'templates/popover.html'" popover-append-to-body=true
+                ng-click="popoverEl = 'alias'" popover-trigger="'outsideClick'">
               <span style="color: Maroon;">{{message.alias || 'Unknown'}}</span>
             </td>
-            <td class="shrink noMobile noSmall" ng-if="!user">
+            <td class="shrink noMobile" ng-if="!user">
               <span>{{message.alias || ''}}</span>
             </td>
-            <td class="expand"><div highlight="message.message" replacement="init.replaceText" class="pagerMessage"></td>
+            <td class="expand">
+              <div highlight="message.message" replacement="init.replaceText" class="pagerMessage"></div>
+            </td>
         </tbody>
       </table>
+    </div>
+  <div class="row" ng-if="messages.length == 0">
+    <div class="col-sm-8 col-sm-offset-2" style="text-align: center; vertical-align: middle;">
+      <h4>No messages found!</h4>
+      <div ng-if="hasQuery"><p>Consider broadening your search terms and try again.</p></div>
+      <div ng-if="!hasQuery"><p>Have you loaded any message data yet?</p>
+        <p>If you believe you reached this message by error, <a href="https://github.com/pagermon/pagermon/issues"
+                                                                target="_blank">log an issue.</a></p>
       </div>
-    <div class="row" ng-if="messages.length == 0">
-      <div class="col-sm-8 col-sm-offset-2" style="text-align: center; vertical-align: middle;">
-        <h4>No messages found!</h4>
-        <div ng-if="hasQuery"><p>Consider broadening your search terms and try again.</p></div>
-        <div ng-if="!hasQuery"><p>Have you loaded any message data yet?</p>
-          <p>If you believe you reached this message by error, <a href="https://github.com/pagermon/pagermon/issues" target="_blank">log an issue.</a></p>
-        </div>
       </div>
     </div>
     <% if (searchLocation === 'bottom' || typeof searchLocation == 'undefined') { %>
@@ -176,100 +181,100 @@
     <% } %>
     <% include global/pagination.ejs %>
 
-    </div>
+  </div>
   </script>
-  
+
   <script type="text/ng-template" id="/messageDetails.html">
     <h1>{{ message.address }}</h1>
     note: <textarea>{{ message.message }}</textarea>
   </script>
-  
+
   <script>
-var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-highlight', 'ui.bootstrap'])
-    
-    .factory('socket', function ($rootScope) {
-      
-    var socket = io({transports: ['websocket'], upgrade: false});
-      return {
-        open: function() {
-          socket = io({transports: ['websocket'], upgrade: false});
-          socket.open();
-        },
-        on: function (eventName, callback) {
-          socket.on(eventName, function () {  
-            var args = arguments;
-            $rootScope.$apply(function () {
-              callback.apply(socket, args);
-            });
-          });
-        },
-        emit: function (eventName, data, callback) {
-          socket.emit(eventName, data, function () {
-            var args = arguments;
-            $rootScope.$apply(function () {
-              if (callback) {
-                callback.apply(socket, args);
-              }
-            });
-          })
-        },
-        close: function () {
-          socket.close();
-        }
-      };
-    })
-    
-  
-  .factory('adminSocket', function ($rootScope) {
+    var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-highlight', 'ui.bootstrap'])
 
-    var adminSocket = io('/adminio', {transports: ['websocket'], upgrade: false});
-      return {
-        open: function() {
-          adminSocket = io('/adminio', {transports: ['websocket'], upgrade: false});
-          adminSocket.open();
-        },
-        on: function (eventName, callback) {
-          adminSocket.on(eventName, function () {  
-            var args = arguments;
-            $rootScope.$apply(function () {
-              callback.apply(adminSocket, args);
-            });
-          });
-        },
-        emit: function (eventName, data, callback) {
-          adminSocket.emit(eventName, data, function () {
-            var args = arguments;
-            $rootScope.$apply(function () {
-              if (callback) {
-                callback.apply(adminSocket, args);
-              }
-            });
-          })
-        },
-        close: function () {
-          adminSocket.close();
-        }
-      };
-    })
-  
-    .factory('Api', ['$resource',
-     function($resource) {
-      return {
-        Messages: $resource('/api/messages/'),
-        NewMessage: $resource('/api/messages/:id', {id: '@id'}),
-        MessageSearch: $resource('/api/messageSearch/'),
-        Agencies: $resource('/api/capcodes/agency')
-      };
-    }])
-    
+            .factory('socket', function ($rootScope) {
 
-    .run(function($anchorScroll, $window) {
-      // hack to scroll to top when navigating to new URLS but not back/forward
-      var wrap = function(method) {
-        var orig = $window.window.history[method];
-        $window.window.history[method] = function() {
-          var retval = orig.apply(this, Array.prototype.slice.call(arguments));
-          $anchorScroll();
+              var socket = io({transports: ['websocket'], upgrade: false});
+              return {
+                open: function () {
+                  socket = io({transports: ['websocket'], upgrade: false});
+                  socket.open();
+                },
+                on: function (eventName, callback) {
+                  socket.on(eventName, function () {
+                    var args = arguments;
+                    $rootScope.$apply(function () {
+                      callback.apply(socket, args);
+                    });
+                  });
+                },
+                emit: function (eventName, data, callback) {
+                  socket.emit(eventName, data, function () {
+                    var args = arguments;
+                    $rootScope.$apply(function () {
+                      if (callback) {
+                        callback.apply(socket, args);
+                      }
+                    });
+                  })
+                },
+                close: function () {
+                  socket.close();
+                }
+              };
+            })
+
+
+            .factory('adminSocket', function ($rootScope) {
+
+              var adminSocket = io('/adminio', {transports: ['websocket'], upgrade: false});
+              return {
+                open: function () {
+                  adminSocket = io('/adminio', {transports: ['websocket'], upgrade: false});
+                  adminSocket.open();
+                },
+                on: function (eventName, callback) {
+                  adminSocket.on(eventName, function () {
+                    var args = arguments;
+                    $rootScope.$apply(function () {
+                      callback.apply(adminSocket, args);
+                    });
+                  });
+                },
+                emit: function (eventName, data, callback) {
+                  adminSocket.emit(eventName, data, function () {
+                    var args = arguments;
+                    $rootScope.$apply(function () {
+                      if (callback) {
+                        callback.apply(adminSocket, args);
+                      }
+                    });
+                  })
+                },
+                close: function () {
+                  adminSocket.close();
+                }
+              };
+            })
+
+            .factory('Api', ['$resource',
+              function ($resource) {
+                return {
+                  Messages: $resource('/api/messages/'),
+                  NewMessage: $resource('/api/messages/:id', {id: '@id'}),
+                  MessageSearch: $resource('/api/messageSearch/'),
+                  Agencies: $resource('/api/capcodes/agency')
+                };
+              }])
+
+
+            .run(function ($anchorScroll, $window) {
+              // hack to scroll to top when navigating to new URLS but not back/forward
+              var wrap = function (method) {
+                var orig = $window.window.history[method];
+                $window.window.history[method] = function () {
+                  var retval = orig.apply(this, Array.prototype.slice.call(arguments));
+                  $anchorScroll();
           return retval;
         };
       };
@@ -392,197 +397,201 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
                   $scope.messages.pop();
                 }
               }
-            } else {
-              $scope.messages.unshift(message);
-              $scope.messages.pop();
-            }
-          }
-        });	
-      });
-      
-      // this should be popped out into a separate file
-      $scope.updateData = function(page, query){
-        // check if browser supports notifications
-        if ("Notification" in window) {
-          $scope.notificationSupport = true;
-        }
-        // spinner start
-        $scope.spinner = 'fa-spin';
-        $scope.loading = true;
-        $scope.popoverEl = '';
-        // get limit from cookiestore
-        var curPage = page || $routeParams.page || '1';
-        var limit = $cookies.get('messageLimit') || '';
-        $scope.notificationEnabled = $cookies.get('notificationEnabled') || 'true';
-        
-        var queryObj = {};
-            queryObj.page = curPage;
-            queryObj.limit = limit;
-            
-        if ($routeParams.q || query) {
-          $scope.query = query || $routeParams.q;
-          $scope.origQuery = query || $routeParams.q;
-          $scope.hasQuery = true;
-          queryObj.q = query || $routeParams.q;
-        } else {
-          $scope.query = '';
-          $scope.hasQuery = false;
-        }
-        
-        if ($routeParams.agency || $routeParams.address) {
-          $scope.filter = $routeParams.agency || $routeParams.address;
-          $scope.hasQuery = true;
-          if ($routeParams.agency) {
-            queryObj.agency = $routeParams.agency;
-          } else if ($routeParams.address) {
-            queryObj.address = $routeParams.address;
-          }
-        }
-
-        if (page) {
-          // if page then we have been passed a page var directly to the updateData func, which means we clicked on a page change button
-          // encoding everything prevents issues with some special chars
-          var qArray = [];
-          if (queryObj.q)
-            qArray.push('q='+encodeURIComponent(queryObj.q));
-          if (queryObj.address)
-            qArray.push('address='+encodeURIComponent(queryObj.address));
-          if (queryObj.agency)
-            qArray.push('agency='+encodeURIComponent(queryObj.agency));
-          if (queryObj.page > 1)
-            qArray.push('page='+encodeURIComponent(queryObj.page));
-
-          // default query string is "/" - this prevents the state from not passing on firefox
-          var qString = '/';
-          if (qArray.length > 0) {
-            qString = '?'+qArray.join('&');
-          }
-          window.history.pushState('', '', qString);
-        }
-        
-        if (queryObj.q || queryObj.agency || queryObj.address) {
-          Api.MessageSearch.get(queryObj).$promise.then(function(results) {
-            //console.log(results);
-              results.init.currentPage++;
-              var startPage, endPage;
-              if (results.init.pageCount <= 10) {
-                  // less than 10 total pages so show all
-                  startPage = 1;
-                  endPage = results.init.pageCount;
-              } else {
-                  // more than 10 total pages so calculate start and end pages
-                  if (results.init.currentPage <= 6) {
-                      startPage = 1;
-                      endPage = 10;
-                  } else if (results.init.currentPage + 4 >= results.init.pageCount) {
-                      startPage = results.init.pageCount - 9;
-                      endPage = results.init.pageCount;
-                  } else {
-                      startPage = results.init.currentPage - 5;
-                      endPage = results.init.currentPage + 4;
+                    } else {
+                      $scope.messages.unshift(message);
+                      $scope.messages.pop();
+                    }
                   }
-              }
-              var pages = $scope.range(startPage, endPage);
-              results.init.pages = pages;
-              $scope.init = results.init;
-              angular.forEach(results.messages, function(result) {
-                var datetime = moment.unix(result.timestamp);
-                result.date = datetime.format("YYYY-MM-DD");
-                result.timestamp = datetime.format("HH:mm");
-                result.message = $scope.htmlEntities(result.message);
-              //  result.padAddress = $scope.padDigits(result.address,7);
-            //    result.aliasMatch = result['MAX(capcodes.address)'];
+                });
               });
-              $scope.spinner = '';
-              $scope.loading = false;
-              $scope.messages = results.messages;
-              // spinner end
-          }, function(error) {
-            console.log('Error on Api.MessageSearch.query!', error);
-            $scope.spinner = '';
-            $scope.loading = false;
-          });
-        } else {
-          Api.Messages.get({page: curPage, limit: limit }).$promise.then(function(results) {
-            //console.log(results);
-            results.init.currentPage++;
-            var startPage, endPage;
-            if (results.init.pageCount <= 10) {
-                // less than 10 total pages so show all
-                startPage = 1;
-                endPage = results.init.pageCount;
-            } else {
-                // more than 10 total pages so calculate start and end pages
-                if (results.init.currentPage <= 6) {
-                    startPage = 1;
-                    endPage = 10;
-                } else if (results.init.currentPage + 4 >= results.init.pageCount) {
-                    startPage = results.init.pageCount - 9;
-                    endPage = results.init.pageCount;
-                } else {
-                    startPage = results.init.currentPage - 5;
-                    endPage = results.init.currentPage + 4;
-                }
-            }
-            var pages = $scope.range(startPage, endPage);
-            results.init.pages = pages;
-            $scope.init = results.init;          
-            angular.forEach(results.messages, function(result) {
-              var datetime = moment.unix(result.timestamp);
-              result.date = datetime.format("YYYY-MM-DD");
-              result.timestamp = datetime.format("HH:mm");
-              result.message = $scope.htmlEntities(result.message);
-            //  result.padAddress = $scope.padDigits(result.address,7);
-            //  result.aliasMatch = result['MAX(capcodes.address)'];
-            });
-            $scope.spinner = '';
-            $scope.loading = false;
-            $scope.messages = results.messages;
-            // spinner end
-          }, function(error) {
-            console.log('Error on Api.Messages.query!', error);
-            $scope.spinner = '';
-            $scope.loading = false;
-          });
-        }
-      };
-      // run the updateData function on load
-      $scope.updateData();
-      
-      // helper functions below
-      $scope.range = function(min, max, step) {
-          step = step || 1;
-          var input = [];
-          for (var i = min; i <= max; i += step) {
-              input.push(i);
-          }
-          return input;
-      };
-      
-      $scope.htmlEntities = function(str) {
-          return String(str).replace(/&/g, '&amp;').replace(/</g, ' ').replace(/>/g, ' ').replace(/"/g, '&quot;');
-      }
-      
-      $scope.padDigits = function(number, digits) {
-          return Array(Math.max(digits - String(number).length + 1, 0)).join(0) + number;
-      }
-      
-      $scope.setCookie = function(cookie, value) {
-          var expireDate = new Date();
-          expireDate.setDate(expireDate.getDate() + 30);
-          $cookies.put(cookie, value, {'expires': expireDate});
-          $scope.updateData($scope.init.currentPage);
-      };
 
-      $scope.toggleNotifications = function() {
-          if ($scope.notificationEnabled == 'true') {
-            $scope.setCookie('notificationEnabled', 'false');
-          } else {
-            $scope.setCookie('notificationEnabled', 'true');
-            Notification.requestPermission(function (permission) {
-              if (!('permission' in Notification)) {
-                  Notification.permission = permission;
+              // this should be popped out into a separate file
+              $scope.updateData = function (page, query) {
+                // check if browser supports notifications
+                if ("Notification" in window) {
+                  $scope.notificationSupport = true;
+                }
+                // spinner start
+                $scope.spinner = 'fa-spin';
+                $scope.loading = true;
+                $scope.popoverEl = '';
+                // get limit from cookiestore
+                var curPage = page || $routeParams.page || '1';
+                var limit = $cookies.get('messageLimit') || '';
+                $scope.notificationEnabled = $cookies.get('notificationEnabled') || 'true';
+
+                var queryObj = {};
+                queryObj.page = curPage;
+                queryObj.limit = limit;
+
+                if ($routeParams.q || query) {
+                  $scope.query = query || $routeParams.q;
+                  $scope.origQuery = query || $routeParams.q;
+                  $scope.hasQuery = true;
+                  queryObj.q = query || $routeParams.q;
+                } else {
+                  $scope.query = '';
+                  $scope.hasQuery = false;
+                }
+
+                if ($routeParams.agency || $routeParams.address || $routeParams.alias) {
+                  $scope.filter = $routeParams.agency || $routeParams.address || $routeParams.alias;
+                  $scope.hasQuery = true;
+                  if ($routeParams.agency)
+                    queryObj.agency = $routeParams.agency;
+                  if ($routeParams.address)
+                    queryObj.address = $routeParams.address;
+                  if ($routeParams.alias)
+                    queryObj.alias = $routeParams.alias;
+                }
+
+                if (page) {
+                  // if page then we have been passed a page var directly to the updateData func, which means we clicked on a page change button
+                  // encoding everything prevents issues with some special chars
+                  var qArray = [];
+                  if (queryObj.q)
+                    qArray.push('q=' + encodeURIComponent(queryObj.q));
+                  if (queryObj.address)
+                    qArray.push('address=' + encodeURIComponent(queryObj.address));
+                  if (queryObj.agency)
+                    qArray.push('agency=' + encodeURIComponent(queryObj.agency));
+                  if (queryObj.alias)
+                    qArray.push('alias=' + encodeURIComponent(queryObj.alias));
+                  if (queryObj.page > 1)
+                    qArray.push('page=' + encodeURIComponent(queryObj.page));
+
+                  // default query string is "/" - this prevents the state from not passing on firefox
+                  var qString = '/';
+                  if (qArray.length > 0) {
+                    qString = '?' + qArray.join('&');
+                  }
+                  window.history.pushState('', '', qString);
+                }
+
+                if (queryObj.q || queryObj.agency || queryObj.address || queryObj.alias) {
+                  Api.MessageSearch.get(queryObj).$promise.then(function (results) {
+                    //console.log(results);
+                    results.init.currentPage++;
+                    var startPage, endPage;
+                    if (results.init.pageCount <= 10) {
+                      // less than 10 total pages so show all
+                      startPage = 1;
+                      endPage = results.init.pageCount;
+                    } else {
+                      // more than 10 total pages so calculate start and end pages
+                      if (results.init.currentPage <= 6) {
+                        startPage = 1;
+                        endPage = 10;
+                      } else if (results.init.currentPage + 4 >= results.init.pageCount) {
+                        startPage = results.init.pageCount - 9;
+                        endPage = results.init.pageCount;
+                      } else {
+                        startPage = results.init.currentPage - 5;
+                        endPage = results.init.currentPage + 4;
+                      }
+                    }
+                    var pages = $scope.range(startPage, endPage);
+                    results.init.pages = pages;
+                    $scope.init = results.init;
+                    angular.forEach(results.messages, function (result) {
+                      var datetime = moment.unix(result.timestamp);
+                      result.date = datetime.format("YYYY-MM-DD");
+                      result.timestamp = datetime.format("HH:mm");
+                      result.message = $scope.htmlEntities(result.message);
+                      //  result.padAddress = $scope.padDigits(result.address,7);
+                      //    result.aliasMatch = result['MAX(capcodes.address)'];
+                    });
+                    $scope.spinner = '';
+                    $scope.loading = false;
+                    $scope.messages = results.messages;
+                    // spinner end
+                  }, function (error) {
+                    console.log('Error on Api.MessageSearch.query!', error);
+                    $scope.spinner = '';
+                    $scope.loading = false;
+                  });
+                } else {
+                  Api.Messages.get({page: curPage, limit: limit}).$promise.then(function (results) {
+                    //console.log(results);
+                    results.init.currentPage++;
+                    var startPage, endPage;
+                    if (results.init.pageCount <= 10) {
+                      // less than 10 total pages so show all
+                      startPage = 1;
+                      endPage = results.init.pageCount;
+                    } else {
+                      // more than 10 total pages so calculate start and end pages
+                      if (results.init.currentPage <= 6) {
+                        startPage = 1;
+                        endPage = 10;
+                      } else if (results.init.currentPage + 4 >= results.init.pageCount) {
+                        startPage = results.init.pageCount - 9;
+                        endPage = results.init.pageCount;
+                      } else {
+                        startPage = results.init.currentPage - 5;
+                        endPage = results.init.currentPage + 4;
+                      }
+                    }
+                    var pages = $scope.range(startPage, endPage);
+                    results.init.pages = pages;
+                    $scope.init = results.init;
+                    angular.forEach(results.messages, function (result) {
+                      var datetime = moment.unix(result.timestamp);
+                      result.date = datetime.format("YYYY-MM-DD");
+                      result.timestamp = datetime.format("HH:mm");
+                      result.message = $scope.htmlEntities(result.message);
+                      //  result.padAddress = $scope.padDigits(result.address,7);
+                      //  result.aliasMatch = result['MAX(capcodes.address)'];
+                    });
+                    $scope.spinner = '';
+                    $scope.loading = false;
+                    $scope.messages = results.messages;
+                    // spinner end
+                  }, function (error) {
+                    console.log('Error on Api.Messages.query!', error);
+                    $scope.spinner = '';
+                    $scope.loading = false;
+                  });
+                }
+              };
+              // run the updateData function on load
+              $scope.updateData();
+
+              // helper functions below
+              $scope.range = function (min, max, step) {
+                step = step || 1;
+                var input = [];
+                for (var i = min; i <= max; i += step) {
+                  input.push(i);
+                }
+                return input;
+              };
+
+              $scope.htmlEntities = function (str) {
+                return String(str).replace(/&/g, '&amp;').replace(/</g, ' ').replace(/>/g, ' ').replace(/"/g, '&quot;');
               }
+
+              $scope.padDigits = function (number, digits) {
+                return Array(Math.max(digits - String(number).length + 1, 0)).join(0) + number;
+              }
+
+              $scope.setCookie = function (cookie, value) {
+                var expireDate = new Date();
+                expireDate.setDate(expireDate.getDate() + 30);
+                $cookies.put(cookie, value, { 'expires': expireDate });
+                $scope.updateData($scope.init.currentPage);
+              };
+
+              $scope.toggleNotifications = function () {
+                if ($scope.notificationEnabled == 'true') {
+                  $scope.setCookie('notificationEnabled', 'false');
+                } else {
+                  $scope.setCookie('notificationEnabled', 'true');
+                  Notification.requestPermission(function (permission) {
+                    if (!('permission' in Notification)) {
+                      Notification.permission = permission;
+                }
+
             });
           }
       };
@@ -615,14 +624,13 @@ var app = angular.module('app', ['ngRoute', 'ngResource', 'ngCookies', 'angular-
 function notify(notifyTitle,notifyMessage) {
     if (!("Notification" in window)) {
         console.log("This browser does not support desktop notification");
-    }
-    else if (Notification.permission === "granted") {
+      } else if (Notification.permission === "granted") {
         var options = {
-            body: notifyMessage,
-            icon: '/favicon.ico'
+          body: notifyMessage,
+          icon: '/favicon.ico'
         };
-        var notification = new Notification(notifyTitle,options);
-    }
+        var notification = new Notification(notifyTitle, options);
+      }
     else if (Notification.permission !== 'denied') {
         Notification.requestPermission(function (permission) {
             if (!('permission' in Notification)) {

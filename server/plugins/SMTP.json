@@ -55,7 +55,7 @@
         {
             "name": "enable",
             "label": "Enable",
-            "description": "Enable sending messages that match this alias via Pushover",
+            "description": "Enable sending messages that match this alias via SMTP",
             "type": "checkbox"
         },
         {

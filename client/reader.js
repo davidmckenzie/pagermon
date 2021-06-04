@@ -31,6 +31,8 @@ var apikey = nconf.get('apikey');
 var identifier = nconf.get('identifier');
 var sendFunctionCode = nconf.get('sendFunctionCode') || false;
 var useTimestamp = nconf.get('useTimestamp') || true;
+var EASOpts = nconf.get('EAS'); // Import EAS Config Object Ref Pull 435
+
 
 //Check if hostname is in a valid format - currently only removes trailing slash - possibly expand to validate the whole URI? 
 if(hostname.substr(-1) === '/') {
@@ -59,82 +61,98 @@ const rl = readline.createInterface({
 });
 
 var frag = {};
-
+var SAME = require('@maxwelldps/jsame'); //Import jSAME EAS decode 
 rl.on('line', (line) => {
-  //console.log(`Received: ${line.trim()}`);
-  var time = moment().format("YYYY-MM-DD HH:mm:ss");
-  var timeString = '';
-  var datetime = moment().unix();
-  var address;
-  var message;
-  var trimMessage;
-  // TODO: pad address with zeros for better address matching
-//  if (line.indexOf('POCSAG512: Address:') > -1) {	
-  if (/POCSAG(\d+): Address: /.test(line) ) {
-    address = line.match(/POCSAG(\d+): Address:(.*?)Function/)[2].trim();
-    if (sendFunctionCode) {
-      address += line.match(/POCSAG(\d+): Address:(.*?)Function: (\d)/)[3];
-    }
-    if (line.indexOf('Alpha:') > -1) {
-      message = line.match(/Alpha:(.*?)$/)[1].trim();
-      if (useTimestamp) {
-        if (message.match(/\d{2} \w+ \d{4} \d{2}:\d{2}:\d{2}/)) {
-          timeString = message.match(/\d+ \w+ \d+ \d{2}:\d{2}:\d{2}/)[0];
-          if (moment(timeString, 'DD MMMM YYYY HH:mm:ss').isValid()) {
-            datetime = moment(timeString, 'DD MMMM YYYY HH:mm:ss').unix();
-            message = message.replace(/\d{2} \w+ \d{4} \d{2}:\d{2}:\d{2}/,'');
-          }
-        } else if (message.match(/\d+-\d+-\d+ \d{2}:\d{2}:\d{2}/)) {
-          timeString = message.match(/\d+-\d+-\d+ \d{2}:\d{2}:\d{2}/)[0];
-          if (moment(timeString).isValid()) {
-            datetime = moment(timeString).unix();
-            message = message.replace(/\d+-\d+-\d+ \d{2}:\d{2}:\d{2}/, '');
-          }
+    //console.log(`Received: ${line.trim()}`);
+    var time = moment().format("YYYY-MM-DD HH:mm:ss");
+    var timeString = '';
+    var datetime = moment().unix();
+    var address;
+    var message;
+    var trimMessage;
+    // TODO: pad address with zeros for better address matching
+    //  if (line.indexOf('POCSAG512: Address:') > -1) {	
+    if (/POCSAG(\d+): Address: /.test(line)) {
+        address = line.match(/POCSAG(\d+): Address:(.*?)Function/)[2].trim();
+        if (sendFunctionCode) {
+            address += line.match(/POCSAG(\d+): Address:(.*?)Function: (\d)/)[3];
         }
-      }
-      trimMessage = message.replace(/<[A-Za-z]{3}>/g,'').replace(/Ä/g,'[').replace(/Ü/g,']').trim();
-    } else if (line.indexOf('Numeric:') > -1) {
-      message = line.match(/Numeric:(.*?)$/)[1].trim();
-      trimMessage = message.replace(/<[A-Za-z]{3}>/g,'').replace(/Ä/g,'[').replace(/Ü/g,']');
-    } else {
-      message = false;
-      trimMessage = '';
-    }
-  } else if (line.match(/FLEX[:|]/)) {
-    address = line.match(/FLEX[:|] ?.*?[\[|](\d*?)[\]| ]/)[1].trim();
-    if (useTimestamp) {
-      if (line.match(/FLEX[:|] ?\d{2} \w+ \d{4} \d{2}:\d{2}:\d{2}/)) {
-        timeString = line.match(/\d+ \w+ \d+ \d{2}:\d{2}:\d{2}/)[0];
-        if (moment(timeString, 'DD MMMM YYYY HH:mm:ss').isValid()) {
-          datetime = moment(timeString, 'DD MMMM YYYY HH:mm:ss').unix();
+        if (line.indexOf('Alpha:') > -1) {
+            message = line.match(/Alpha:(.*?)$/)[1].trim();
+            if (useTimestamp) {
+                if (message.match(/\d{2} \w+ \d{4} \d{2}:\d{2}:\d{2}/)) {
+                    timeString = message.match(/\d+ \w+ \d+ \d{2}:\d{2}:\d{2}/)[0];
+                    if (moment(timeString, 'DD MMMM YYYY HH:mm:ss').isValid()) {
+                        datetime = moment(timeString, 'DD MMMM YYYY HH:mm:ss').unix();
+                        message = message.replace(/\d{2} \w+ \d{4} \d{2}:\d{2}:\d{2}/, '');
+                    }
+                } else if (message.match(/\d+-\d+-\d+ \d{2}:\d{2}:\d{2}/)) {
+                    timeString = message.match(/\d+-\d+-\d+ \d{2}:\d{2}:\d{2}/)[0];
+                    if (moment(timeString).isValid()) {
+                        datetime = moment(timeString).unix();
+                        message = message.replace(/\d+-\d+-\d+ \d{2}:\d{2}:\d{2}/, '');
+                    }
+                }
+            }
+            trimMessage = message.replace(/<[A-Za-z]{3}>/g, '').replace(/Ä/g, '[').replace(/Ü/g, ']').trim();
+        } else if (line.indexOf('Numeric:') > -1) {
+            message = line.match(/Numeric:(.*?)$/)[1].trim();
+            trimMessage = message.replace(/<[A-Za-z]{3}>/g, '').replace(/Ä/g, '[').replace(/Ü/g, ']');
+        } else {
+            message = false;
+            trimMessage = '';
         }
-      } else if (line.match(/FLEX[:|] ?\d+-\d+-\d+ \d{2}:\d{2}:\d{2}/)) {
-        timeString = line.match(/\d+-\d+-\d+ \d{2}:\d{2}:\d{2}/)[0];
-        if (moment(timeString).isValid()) {
-          datetime = moment(timeString).unix();
+    } else if (line.match(/FLEX[:|]/)) {
+        address = line.match(/FLEX[:|] ?.*?[\[|](\d*?)[\]| ]/)[1].trim();
+        if (useTimestamp) {
+            if (line.match(/FLEX[:|] ?\d{2} \w+ \d{4} \d{2}:\d{2}:\d{2}/)) {
+                timeString = line.match(/\d+ \w+ \d+ \d{2}:\d{2}:\d{2}/)[0];
+                if (moment(timeString, 'DD MMMM YYYY HH:mm:ss').isValid()) {
+                    datetime = moment(timeString, 'DD MMMM YYYY HH:mm:ss').unix();
+                }
+            } else if (line.match(/FLEX[:|] ?\d+-\d+-\d+ \d{2}:\d{2}:\d{2}/)) {
+                timeString = line.match(/\d+-\d+-\d+ \d{2}:\d{2}:\d{2}/)[0];
+                if (moment(timeString).isValid()) {
+                    datetime = moment(timeString).unix();
+                }
+            }
         }
+        if (line.match(/([ |]ALN[ |]|[ |]GPN[ |]|[ |]NUM[ |])/)) {
+            message = line.match(/FLEX[:|].*[|\[][0-9 ]*[|\]] ?...[ |](.+)/)[1].trim();
+            if (line.match(/[ |][0-9]{4}\/[0-9]\/F\/.[ |]/)) {
+                // message is fragmented, hold onto it for next line
+                frag[address] = message;
+                message = false;
+                trimMessage = '';
+            } else if (line.match(/[ |][0-9]{4}\/[0-9]\/C\/.[ |]/)) {
+                // message is a completion of the last fragmented message
+                trimMessage = frag[address] + message;
+                delete frag[address];
+            } else if (line.match(/[ |][0-9]{4}\/[0-9]\/K\/.[ |]/)) {
+                // message is a full message
+                trimMessage = message;
+            } else {
+                // message doesn't have the KFC flags, treat as full message
+                trimMessage = message;
+            }
+        }
+    } else if (line.match(/(EAS[:|]|ZCZC-)/)) {                                                     // Adds EAS US/CA SAME Message Support          //Matches "EAS: ZCZC-ORG-EEE-PSSCCC+TTTT-JJJHHMM-CALL/FM -" OR "ZCZC-ORG-EEE-PSSCCC+TTTT-JJJHHMM-CALL/FM -" This allows future proofing or alternative feeding
+        var decodedMessage = SAME.decode(line, EASOpts.excludeEvents, EASOpts.includeFIPS);          // Returns a object with all the info
+        if (decodedMessage) {
+            if (EASOpts.addressAddType) {                                                             // Add type to address usefull for aleting to pushover, so a severe thunderstorm watch is KOAX-WXR-A and severe thunderstorm warning is KOAX-WXR-W // This allows easy alert filtering if useing pushover or something similar 
+                address = decodedMessage["LLLL-ORG"] + '-' + decodedMessage["type"];                // Addresses are the following schema LLLL-ORG-type so for the exaple following the address is "KOAX-WXR-W" :  ZCZC-WXR-TOR-031109+0015-3650000-KOAX/NWS -
+            } else {
+                address = decodedMessage["LLLL-ORG"]                                                 // Addresses are the following schema LLLL-ORG      so for the exaple following the address is "KOAX-WXR"   :  ZCZC-WXR-TOR-031109+0015-3650000-KOAX/NWS -
+            }
+            message = decodedMessage
+            trimMessage = decodedMessage["MESSAGE"]
+            datetime = moment().unix();                                                               // Just get current time as any EAS will likely be effective at time of transmission
+        } else {
+          address = '';
+          message = false;
+          trimMessage = '';
       }
-    }
-    if (line.match( /([ |]ALN[ |]|[ |]GPN[ |]|[ |]NUM[ |])/ )) {
-      message = line.match(/FLEX[:|].*[|\[][0-9 ]*[|\]] ?...[ |](.+)/)[1].trim();
-      if (line.match( /[ |][0-9]{4}\/[0-9]\/F\/.[ |]/ )) {
-        // message is fragmented, hold onto it for next line
-        frag[address] = message;
-        message = false;
-        trimMessage = '';
-      } else if (line.match( /[ |][0-9]{4}\/[0-9]\/C\/.[ |]/ )) {
-        // message is a completion of the last fragmented message
-        trimMessage = frag[address]+message;
-        delete frag[address];
-      } else if (line.match( /[ |][0-9]{4}\/[0-9]\/K\/.[ |]/ )) {
-        // message is a full message
-        trimMessage = message;
-      } else {
-        // message doesn't have the KFC flags, treat as full message
-        trimMessage = message;
-      }
-    }
-  } else {
+   }else {
     address = '';
     message = false;
     trimMessage = '';
@@ -156,7 +174,6 @@ rl.on('line', (line) => {
   } else {
     console.log(colors.red(time+': ')+colors.grey(line));
   }
-  
 }).on('close', () => {
   console.log('Input died!');
 });

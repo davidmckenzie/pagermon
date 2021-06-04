@@ -21,12 +21,13 @@ The UI is built around a Node/Express/Angular/Bootstrap stack, while the client 
 
 * Capcode aliasing with colors and [FontAwesome](https://fontawesome.io/icons/) icons
 * API driven extensible architecture
-* Single user, multiple API keys
+* Multi-user support
 * SQLite or MySQL database backing
 * Configurable via UI
 * Pagination and searching
 * Filtering by capcode or agency
 * Duplicate message filtering
+* Native POCSAG / FLEX / EAS Client Support
 * Keyword highlighting
 * WebSockets support - messages are delivered to clients in near realtime
 * Pretty HTML5
@@ -37,7 +38,7 @@ The UI is built around a Node/Express/Angular/Bootstrap stack, while the client 
     * [Telegram](https://telegram.org/) near realtime cloud based multi-device messaging
     * [Discord](https://discordapp.com/) near realtime cloud based messaging service
     * [Gotify](https://gotify.net/) Self-Hosted messaging service
-    * [Twitter](www.twitter.com)
+    * [Twitter](https://www.twitter.com/)
     * [Microsoft Teams](https://products.office.com/en-us/microsoft-teams/group-chat-software) Team colaboration platform
     * [Slack](https://slack.com/) Team colabortation platform
     * SMTP Email Support for conventional SMTP email notifications 
@@ -48,14 +49,11 @@ The UI is built around a Node/Express/Angular/Bootstrap stack, while the client 
 
 ### Planned Features
 
-* Multi-user support
-* Postgres + MariaDB Support
 * Horizontal scaling
 * Enhanced message filtering
 * Bootstrap 4 + Angular 2 support
 * Enhanced alias control
 * Graphing
-* Non-sucky documentation
 
 ### Screenshots
 
@@ -71,7 +69,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-* [nodejs](https://nodejs.org/)
+* [nodejs](https://nodejs.org/) 12.x or higher
 * sqlite3
 * Probably some other stuff
 
@@ -205,6 +203,96 @@ See [additional parameters](https://github.com/SloCompTech/docker-baseimage).
 
 **Tip:** You probably want to setup docker log rotation before, more can be found [here](https://success.docker.com/article/how-to-setup-log-rotation-post-installation).
 
+## Running the client
+
+### Local setup
+
+
+#### Prerequisites
+These programs/libraries are required for Pagermon Client to work
+
+* [RTL-SDR](https://www.rtl-sdr.com/rtl-sdr-quick-start-guide/) - RTL-SDR tools/libraries to access RTL-SDR dongle
+* [RTL-SDR dongle](https://www.rtl-sdr.com/buy-rtl-sdr-dvb-t-dongles/)  - You can get these from Ebay, Amazon or other stores (Has to have RTL2832U chip)
+* [nodejs](https://nodejs.org/en/) - JavaScript Programming Language (Only if installing separate from server)
+* [npm](https://www.npmjs.com/) - Javascript Package Manager (Only if installing separate from server)
+* [Git Client](https://git-scm.com/) - Github.com client for getting source code (Only if installing separate from server) 
+
+To install the Prerequisites run
+`sudo apt install nodejs npm git rtl-sdr`
+
+#### Installing Pagermon Client
+Run the following commands from Terminal:
+```
+git clone https://github.com/pagermon/pagermon.git
+cd pagermon/client
+npm install
+```
+edit `reader.sh` and edit frequency and rtl_device number, Edit Multimon-ng command
+```Bash
+rtl_fm -d 0 -E dc -F 0 -A fast -f 148.5875M -s22050 - |
+multimon-ng -q -b1 -c -a POCSAG512 -f alpha -t raw /dev/stdin |
+node reader.js
+```
+`-d 0` - change this to your rtl_device number using rtl_test
+
+`-f 148.5875M` - change this to the frequency you are decoding
+
+#### Multimon-ng Command examples
+##### POCSAG
+> multimon-ng -q -b1 -c -a POCSAG512 -f alpha -t raw /dev/stdin
+
+##### FLEX
+>  multimon-ng -a FLEX -t raw /dev/stdin
+
+##### EAS
+> multimon-ng -a EAS -t raw /dev/stdin
+
+
+#### Configuring Pagermon Client
+Before running Pagermon Client you have to configure it to send the decoded info to the pagermon server.
+
+copy default.json to config.json 
+```
+cp config/default.json config/config.json 
+```
+
+Edit config.json with your favorite editor
+```
+{
+  "apikey": "changeme",
+  "hostname": "http://127.0.0.1:3000",
+  "identifier": "TEST",
+  "sendFunctionCode": false,
+  "useTimestamp": true,
+  "EAS": {
+    "excludeEvents": [],
+    "includeFIPS": [],
+    "addressAddType": true
+  }
+}
+
+```
+
+#### Pager Options
+
+**apikey:**  This is the API key generate on the Pagermon Server http://serverip/admin/settings
+
+**hostname:** The host name or IP of the Pagermon server (If you run Pagermon Server and Client on same PC then you can put this as `http://127.0.0.1:3000`
+
+**identifier:** This will show up in the source column on the server web page good for when you have multiple sources and want to know which one the pager message is coming from
+
+**sendFunctionCode:** This will appand the function code to the address of the message **true** or **false**
+
+**useTimestamp:** This will use the time in the message **true** or **false**
+
+#### EAS Options
+**excludeEvents:** Allows a list of [Events](https://github.com/MaxwellDPS/jsame#event-codes) to exclude ie `["RWT","RMT","SVA"]`
+
+**includeFIPS:** Allows you to filter on a list of FIPS to alert on ie `["031109", "031000"]`
+
+**addressAddType:** Will append the event code to the address so `KOAX-WXR` would become KOAX-WXR-W for `ZCZC-WXR-TOR-031109+0015-3650000-KOAX/NWS -` **true** or **false**
+
+
 ## PagermonPi - Raspberry Pi Image
 Check out our Raspberry Pi Image for Pi3 & Pi4 which has Pagermon pre-loaded on it.
 
@@ -246,3 +334,4 @@ This project is licensed under The Unlicense - because fuck licenses. Do what yo
 ## Acknowledgments
 
 * [multimon-ng](https://github.com/EliasOenal/multimon-ng)
+* [jSAME](https://github.com/MaxwellDPS/jsame)

@@ -38,7 +38,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         }),
       };
     }])
-    
+
     // Controller
     .controller('AliasController', ['$scope', '$routeParams', 'Api', '$uibModal', '$filter', '$location', '$timeout', 'FileSaver', function ($scope, $routeParams, Api, $uibModal, $filter, $location, $timeout, FileSaver) {
       $scope.loading = true;
@@ -59,7 +59,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           }
         }
       });
-      
+
       $scope.aliasRefresh = function () {
         $scope.loading = true;
         $scope.alertMessage = {};
@@ -80,11 +80,13 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           }
         }, function(response) {
           console.log(response);
-          $scope.alertMessage.text = 'Error refreshing aliases: '+response.data.error;
+          $scope.alertMessage.text = 'Error refreshing aliases: ' + response.data.error;
           $scope.alertMessage.type = 'alert-danger';
           $scope.alertMessage.show = true;
-          $timeout(function () { $scope.alertMessage.show = false; }, 3000);
-          $scope.loading = false;          
+          $timeout(function () {
+            $scope.alertMessage.show = false;
+          }, 3000);
+          $scope.loading = false;
         });
       };
 
@@ -94,26 +96,32 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         Api.AliasExport.post(null, null).$promise.then(function (response) {
           console.log(response);
           $scope.loading = false;
-          if (response.data) {          
-            var blob = new Blob([response.data], { type: "text/csv;charset=utf-8" }); 
-            FileSaver.saveAs(blob, "export.csv"); 
+          if (response.data) {
+            var blob = new Blob([response.data], {type: "text/csv;charset=utf-8"});
+            FileSaver.saveAs(blob, "export.csv");
             $scope.alertMessage.text = 'Alias export complete!';
             $scope.alertMessage.type = 'alert-success';
             $scope.alertMessage.show = true;
-            $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+            $timeout(function () {
+              $scope.alertMessage.show = false;
+            }, 3000);
           } else {
-            $scope.alertMessage.text = 'Error exporting aliases: '+response.data.error;
+            $scope.alertMessage.text = 'Error exporting aliases: ' + response.data.error;
             $scope.alertMessage.type = 'alert-danger';
             $scope.alertMessage.show = true;
-            $timeout(function () { $scope.alertMessage.show = false; }, 3000);
+            $timeout(function () {
+              $scope.alertMessage.show = false;
+            }, 3000);
           }
         }, function(response) {
           console.log(response);
-          $scope.alertMessage.text = 'Error exporting aliases: '+response.data.error;
+          $scope.alertMessage.text = 'Error exporting aliases: ' + response.data.error;
           $scope.alertMessage.type = 'alert-danger';
           $scope.alertMessage.show = true;
-          $timeout(function () { $scope.alertMessage.show = false; }, 3000);
-          $scope.loading = false;          
+          $timeout(function () {
+            $scope.alertMessage.show = false;
+          }, 3000);
+          $scope.loading = false;
         });
       };
 
@@ -139,7 +147,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         $scope.loading = true;
         var filename = document.getElementById("importcsv");
         if (filename.value.length < 1) {
-          // noidea i stole this code. 
+          // noidea i stole this code.
         } else {
           var file = filename.files[0];
           console.log(file)
@@ -195,42 +203,46 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
             }
             reader.readAsText(filename.files[0]);
           }
-          return false; //no idea what this does, was also in the code i stole and it doesn't work without it. 
+          return false; //no idea what this does, was also in the code i stole and it doesn't work without it.
         }
       };
 
-      $scope.messageDetail = function(address) {
-          $location.url('/aliases/'+address);
+      $scope.aliasDetail = function (alias_id) {
+        $location.url('/aliases/' + alias_id);
       };
 
-      $scope.aliasSelected = function() {
+      $scope.aliasMessages = function (alias_id) {
+        $location.url('../../?alias=' + alias_id);
+      }
+
+      $scope.aliasSelected = function () {
         if ($scope.aliases) {
           var trues = $filter("filter")($scope.aliases, {
-              selected: true
+            selected: true
           });
           return trues.length;
         }
       };
-      
+
       $scope.aliasDelete = function () {
         var numSelected = $scope.aliasSelected();
         var modalHtml =  '<div class="modal-header"><h5 class="modal-title" id="modal-title">Delete aliases</h5></div>';
         var message   =  '<p>Are you sure you want to delete these aliases?</p><p>Aliases cannot be restored after saving.</p><p><strong>'+numSelected+' aliases selected for deletion.</strong></p>';
             modalHtml += '<div class="modal-body">' + message + '</div>';
             modalHtml += '<div class="modal-footer"><button class="btn btn-danger" ng-click="confirmDelete()">OK</button><button class="btn btn-primary" ng-click="cancelDelete()">Cancel</button></div>';
-        
+
         var modalInstance = $uibModal.open({
           template: modalHtml,
           controller: ConfirmController
         });
-    
+
         modalInstance.result.then(function() {
           $scope.aliasDeleteConfirmed();
         }, function () {
           //$log.info('Modal dismissed at: ' + new Date());
         });
       };
-      
+
       $scope.aliasDeleteConfirmed = function () {
         var deleteList = [];
         $scope.loading = true;
@@ -260,14 +272,16 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           }
         }, function(response) {
           console.log(response);
-          $scope.alertMessage.text = 'Error deleting alias: '+response.data.error;
+          $scope.alertMessage.text = 'Error deleting alias: ' + response.data.error;
           $scope.alertMessage.type = 'alert-danger';
           $scope.alertMessage.show = true;
-          $timeout(function () { $scope.alertMessage.show = false; }, 3000);
-          $scope.loading = false;          
+          $timeout(function () {
+            $scope.alertMessage.show = false;
+          }, 3000);
+          $scope.loading = false;
         });
       };
-      
+
       var ConfirmController = function ($scope, $uibModalInstance) {
         $scope.confirmDelete = function () {
           $uibModalInstance.close();
@@ -666,7 +680,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
       $scope.newButton = function(address) {
           $location.url('/aliases/'+address);
       };
-      
+
       $scope.aliasRefresh = function () {
         $scope.loading = true;
         $scope.alertMessage = {};
@@ -687,14 +701,16 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           }
         }, function(response) {
           console.log(response);
-          $scope.alertMessage.text = 'Error refreshing aliases: '+response.data.error;
+          $scope.alertMessage.text = 'Error refreshing aliases: ' + response.data.error;
           $scope.alertMessage.type = 'alert-danger';
           $scope.alertMessage.show = true;
-          $timeout(function () { $scope.alertMessage.show = false; }, 3000);
-          $scope.loading = false;          
+          $timeout(function () {
+            $scope.alertMessage.show = false;
+          }, 3000);
+          $scope.loading = false;
         });
       };
-      
+
       $scope.aliasLoad = function() {
         $scope.loading = true;
         Api.AliasDetail.get({id: $routeParams.id }, function(results) {
@@ -756,7 +772,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           return false;
         }
       };
-      
+
       $scope.aliasSubmit = function() {
         if ($scope.existingAddress) {
           $scope.alertMessage.text = 'Error saving alias: Alias with this address already exists.';
@@ -800,7 +816,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           });
         }
       };
-      
+
       $scope.aliasDelete = function () {
         var modalHtml =  '<div class="modal-header"><h5 class="modal-title" id="modal-title">Delete Alias</h5></div>';
             modalHtml += '<div class="modal-body"><p>Are you sure you want to delete this alias?</p><p>Aliases cannot be restored after deletion.</p></div>';
@@ -815,7 +831,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           //$log.info('Modal dismissed at: ' + new Date());
         });
       };
-      
+
       $scope.aliasDeleteConfirmed = function () {
         console.log('Deleting alias '+$scope.alias.address);
         $scope.loading = true;
@@ -837,14 +853,16 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           }
         }, function(response) {
           console.log(response);
-          $scope.alertMessage.text = 'Error deleting alias: '+response.data.error;
+          $scope.alertMessage.text = 'Error deleting alias: ' + response.data.error;
           $scope.alertMessage.type = 'alert-danger';
           $scope.alertMessage.show = true;
-          $timeout(function () { $scope.alertMessage.show = false; }, 3000);
-          $scope.loading = false;          
+          $timeout(function () {
+            $scope.alertMessage.show = false;
+          }, 3000);
+          $scope.loading = false;
         });
       };
-      
+
       var ConfirmController = function($scope, $uibModalInstance) {
         $scope.confirmDelete = function() {
           $uibModalInstance.close();
@@ -898,16 +916,18 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           }
         }, function(response) {
           console.log(response);
-          $scope.alertMessage.text = 'Error saving settings: '+response.data.error;
+          $scope.alertMessage.text = 'Error saving settings: ' + response.data.error;
           $scope.alertMessage.type = 'alert-danger';
           $scope.alertMessage.show = true;
-          $timeout(function () { $scope.alertMessage.show = false; }, 3000);
-          $scope.loading = false;          
+          $timeout(function () {
+            $scope.alertMessage.show = false;
+          }, 3000);
+          $scope.loading = false;
         });
       };
-      
+
       $scope.page = 'settings';
-      
+
       // this function generates the long API keys
       // gets two 36 char UUIDs, removes the dashes, base36 encodes them, then joins together half of each string
       // for increased key length, uncomment the h2/k2 lines, and swap the kf lines
@@ -929,7 +949,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           $scope.settings.auth.keys[index].key = key;
         }
       };
-      
+
       $scope.showPassword = false;
 
       $scope.toggleShowPassword = function() {
@@ -942,14 +962,14 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           'key': ""
         });
       };
-      
+
       $scope.addMatch = function () {
         $scope.settings.messages.replaceText.push({
           'match': "",
           'replace': ""
         });
       };
-      
+
       $scope.keySelected = function() {
         if ($scope.settings && $scope.settings.auth) {
           var trues = $filter("filter")($scope.settings.auth.keys, {
@@ -958,7 +978,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           return trues.length;
         }
       };
-      
+
       $scope.matchSelected = function() {
         if ($scope.settings && $scope.settings.messages) {
           var trues = $filter("filter")($scope.settings.messages.replaceText, {
@@ -967,23 +987,23 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
           return trues.length;
         }
       };
-      
+
       $scope.removeKey = function () {
         var modalHtml =  '<div class="modal-header"><h5 class="modal-title" id="modal-title">Remove API Keys</h5></div>';
             modalHtml += '<div class="modal-body"><p>Are you sure you want to delete these keys?</p><p>Keys cannot be restored after saving.</p></div>';
             modalHtml += '<div class="modal-footer"><button class="btn btn-danger" ng-click="confirmDelete()">OK</button><button class="btn btn-primary" ng-click="cancelDelete()">Cancel</button></div>';
-        
+
         var modalInstance = $uibModal.open({
           template: modalHtml,
           controller: ConfirmController
         });
-    
+
         modalInstance.result.then(function() {
           $scope.removeKeyConfirmed();
         }, function () {
         });
       };
-      
+
       $scope.removeKeyConfirmed = function () {
         var newDataList=[];
         $scope.selectedAll = false;
@@ -997,7 +1017,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         });
         $scope.settings.auth.keys = newDataList;
       };
-      
+
       $scope.removeMatch = function () {
         var newDataList=[];
         $scope.selectedAll = false;
@@ -1011,7 +1031,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         });
         $scope.settings.messages.replaceText = newDataList;
       };
-      
+
       var ConfirmController = function($scope, $uibModalInstance) {
         $scope.confirmDelete = function() {
           $uibModalInstance.close();
@@ -1021,11 +1041,11 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngSanitize', 'angular-uuid', 'u
         };
       };
     }])
-    
+
     .controller('AdminController', ['$scope', '$routeParams', 'Api', function ($scope, $routeParams, Api) {
       $scope.page = 'admin';
     }])
-    
+
     // Routes
     .config(['$routeProvider', '$locationProvider', '$httpProvider', function ($routeProvider, $locationProvider, $httpProvider) {
       $routeProvider

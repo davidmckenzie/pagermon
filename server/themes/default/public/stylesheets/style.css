@@ -41,6 +41,7 @@
 
 .pagerMessage {
     font-weight: bold;
+    word-break: break-word;
 }
 
 .clickable-td {

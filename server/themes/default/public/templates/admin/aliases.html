@@ -7,7 +7,7 @@
 </div>
 <div class="row" style="padding-top: 10px">
   <div class="col-sm-6 col-xs-12">
-          <h4 style="padding-left: 15px;"><a href="/admin/">Admin</a> / Aliases</div>
+    <h4 style="padding-left: 15px;"><a href="/admin/">Admin</a> / Aliases</h4></div>
 
   <div class="col-xs-12">
           <hr />
@@ -33,30 +33,36 @@
             <th style="text-align: center;">Agency</th>
             <th style="text-align: center;">Filter</th>
             <th style="text-align: center;">Alias</th>
+            <th style="text-align: center;">Show messages</th>
           </tr>
         </thead>
         <tbody>
-          <tr ng-repeat="alias in aliases | filter: search">
-            <!-- TODO: Add links to filters -->
-            <td class="shrink" style="vertical-align: middle;"><input type="checkbox" ng-model="alias.selected"/></td>
-            <td class="shrink clickable-td" style="color: Maroon;" ng-click="messageDetail(alias.id);">
-              <span style="font-family: monospace;"><strong>{{alias.id}}</strong></span>
-              </td>
-            <td class="shrink clickable-td" style="color: Maroon;" ng-click="messageDetail(alias.id);">
-              <span style="font-family: monospace;"><strong>{{alias.address}}</strong></span>
-              </td>
-            <td class="shrink" style="background-color: {{alias.color || 'transparent'}};">
-              <span style="color: {{ alias.color ? 'white' : 'black' }};"><strong>{{alias.color}}</strong></span>
-            <td class="shrink">
+        <tr ng-repeat="alias in aliases | filter: search">
+          <!-- TODO: Add links to filters -->
+          <td class="shrink" style="vertical-align: middle;"><input ng-model="alias.selected" type="checkbox"/></td>
+          <td class="shrink clickable-td" ng-click="aliasDetail(alias.id);" style="color: Maroon;">
+            <span style="font-family: monospace;"><strong>{{alias.id}}</strong></span>
+          </td>
+          <td class="shrink clickable-td" ng-click="aliasDetail(alias.id);" style="color: Maroon;">
+            <span style="font-family: monospace;"><strong>{{alias.address}}</strong></span>
+          </td>
+          <td class="shrink" style="background-color: {{alias.color || 'transparent'}};">
+            <span style="color: {{ alias.color ? 'white' : 'black' }};"><strong>{{alias.color}}</strong></span>
+          <td class="shrink">
               <span ng-if="alias.icon" class="fa-stack fa-lg fa-fw" style="color: {{alias.color || 'transparent'}};">
                 <i class="fa fa-circle fa-stack-2x"></i>
                 <i class="fa fa-{{alias.icon}} fa-stack-1x fa-inverse"></i>
               </span>
-              <span style="vertical-align: middle;">{{alias.icon}}</span>
-            </td>
-            <td class="shrink"><strong>{{alias.agency || ''}}</strong></td>
-            <td class="shrink"><i ng-if="alias.ignore == 0" class="fa fa-circle text-success"></i><i ng-if="alias.ignore == 1" class="fa fa-exclamation-circle text-danger"></i></td>
-            <td class="expand clickable-td" ng-click="messageDetail(alias.id);" style="color: Maroon;">{{alias.alias || ''}}</td>
+            <span style="vertical-align: middle;">{{alias.icon}}</span>
+          </td>
+          <td class="shrink"><strong>{{alias.agency || ''}}</strong></td>
+          <td class="shrink"><i class="fa fa-circle text-success" ng-if="alias.ignore == 0"></i><i
+                  class="fa fa-exclamation-circle text-danger" ng-if="alias.ignore == 1"></i></td>
+          <td class="expand clickable-td" ng-click="aliasDetail(alias.id);" style="color: Maroon;">{{alias.alias ||
+            ''}}
+          </td>
+          <td class="shrink clickable-td" ng-click="aliasMessages(alias.id);"><i
+                  class="glyphicon glyphicon-filter"></i></td>
         </tbody>
       </table>
     </div>
@@ -68,5 +74,5 @@
 <div class="btn-group-vertical" id="buttons-management">
   <button type="button" ng-disabled="!aliasSelected()" ng-click="aliasDelete()" class="btn btn-danger ">Delete Selected</button>
   <button ng-if="aliasRefreshRequired == 1" type="button" ng-click="aliasRefresh();" class="btn btn-warning ">Refresh Aliases</button>
-  <button type="button" ng-click="messageDetail('new');" class="btn btn-success ">Add New</button>
+  <button class="btn btn-success " ng-click="aliasDetail('new');" type="button">Add New</button>
 </div>

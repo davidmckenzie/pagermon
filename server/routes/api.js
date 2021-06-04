@@ -112,7 +112,7 @@ router.route('/messages')
           var rowCount
 
           db.from('messages')
-            .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore')
+            .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', db.raw('CASE WHEN NOT capcodes.address = messages.address THEN 1 ELSE 0 END as wildcard'))
             .modify(function (queryBuilder) {
               if (pdwMode) {
                 if (adminShow && req.isAuthenticated() && req.user.role == 'admin') {
@@ -489,7 +489,7 @@ router.route('/messages/:id')
     var id = req.params.id;
 
     db.from('messages')
-      .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore')
+      .select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', db.raw('CASE WHEN NOT capcodes.address = messages.address THEN 1 ELSE 0 END as wildcard'))
       .leftJoin('capcodes', 'capcodes.id', '=', 'messages.alias_id')
       .where('messages.id', id)
       .then((row) => {
@@ -555,6 +555,7 @@ router.route('/messageSearch')
     var query;
     var agency;
     var address;
+    var alias;
     // dodgy handling for unexpected results
     if (typeof req.query.q !== 'undefined') {
       query = req.query.q;
@@ -565,12 +566,15 @@ router.route('/messageSearch')
     if (typeof req.query.address !== 'undefined') {
       address = req.query.address;
     } else { address = ''; }
+    if (typeof req.query.alias !== 'undefined') {
+      alias = req.query.alias;
+    } else { alias = ''; }
 
     // set select commands based on query type
 
     var data = []
     console.time('sql')
-    db.select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore')
+    db.select('messages.*', 'capcodes.alias', 'capcodes.agency', 'capcodes.icon', 'capcodes.color', 'capcodes.ignore', db.raw('CASE WHEN NOT capcodes.address = messages.address THEN 1 ELSE 0 END as wildcard'))
       .modify(function (qb) {
         if (dbtype == 'sqlite3' && query != '') {
           qb.from('messages_search_index')
@@ -601,7 +605,9 @@ router.route('/messageSearch')
           if (agency != '')
             qb.whereIn('messages.alias_id', function (qb2) {
               qb2.select('id').from('capcodes').where('agency', agency).where('ignore', 0);
-            })
+          })
+          if (alias != '')
+            qb.where('messages.alias_id',alias);
         }
       }).orderBy('messages.timestamp', 'desc')
       .then((rows) => {

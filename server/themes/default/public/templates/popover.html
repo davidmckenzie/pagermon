@@ -5,15 +5,15 @@
     <div ng-if="popoverEl == 'address'">
         <a class="btn" href="/?address={{message.address}}">Filter</a>
         <a class="btn" ng-if="message.alias_id && role == 'admin'" target="_blank" href="/admin/aliases/{{message.alias_id}}">Edit Alias</a>
-        <a class="btn" ng-if="!message.alias_id && role == 'admin'" target="_blank" href="/admin/aliases/new?address={{message.address}}">Create Alias</a>
+        <a class="btn" ng-if="(!message.alias_id || message.wildcard) && role == 'admin'" target="_blank" href="/admin/aliases/new?address={{message.address}}">Create Alias</a>
     </div>
     <div ng-if="popoverEl == 'agency'">
         <a class="btn" href="/?agency={{message.agency}}">Filter</a>
     </div>
     <div ng-if="popoverEl == 'alias'">
-        <a class="btn" ng-if="message.alias_id" href="/?q={{message.alias}}">Filter</a>
+        <a class="btn" ng-if="message.alias_id" href="/?alias={{message.alias_id}}">Filter</a>
         <a class="btn" ng-if="message.alias_id && role == 'admin'" target="_blank" href="/admin/aliases/{{message.alias_id}}">Edit Alias</a>
-        <a class="btn" ng-if="!message.alias_id && role == 'admin'" target="_blank" href="/admin/aliases/new?address={{message.address}}">Create Alias</a>
+        <a class="btn" ng-if="(!message.alias_id || message.wildcard) && role == 'admin'" target="_blank" href="/admin/aliases/new?address={{message.address}}">Create Alias</a>
     </div>
 
 </div>
