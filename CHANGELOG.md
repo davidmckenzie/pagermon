@@ -1,4 +1,6 @@
-﻿# 0.3.11 - 2021-05-21
+﻿# 0.3.11 - 2021-06-24
+
+* Change includes to HTTPS to support [CORS-RFC1918](https://wicg.github.io/private-network-access/)
 * Added EAS support, Just run multimon-ng -a EAS #432 @maxwelldps
 * Added EAS FIltering Based on FIPS and EVENT and moved [jsame to git](https://github.com/MaxwellDPS/jsame/packages/329242) And updated jSAME to 0.1.9 #435 @MaxwellDPS
 * Fix to PDW Python ingestion script time format #439 @jjeffhendryx
@@ -11,6 +13,7 @@
 * Fixed Typo's #465 @geelongmicrosoldering
 * Fix layout when message contains long word #474 @geelongmicrosoldering
 * Improved wildcard feature #458 @eopo
+* Change includes to HTTPS to support [CORS-RFC1918](https://wicg.github.io/private-network-access/)
 
 # 0.3.10 - 2020-06-24
 
